@@ -730,7 +730,12 @@
                 <button id="loginBtn" class="save">Войти</button>
             </div>
             
-            <div class="auth-demo">Демо-доступ: user1 / 123456, user2 / 123456, admin / admin123</div>
+            <div class="auth-demo">
+                <strong>Демо-доступ:</strong><br>
+                Менеджер: user1 / 123456<br>
+                Разработчик: user2 / 123456<br>
+                Администратор: admin / admin123
+            </div>
         </div>
     </div>
 
@@ -762,6 +767,37 @@
                     <div class="surface">
                         <h3>Календарь</h3>
                         <div class="calendar" id="calendar"></div>
+                    </div>
+
+                    <!-- Add Task Form -->
+                    <div class="surface">
+                        <h3>Добавить задачу</h3>
+                        <div class="add-task-form">
+                            <div class="task-input-row">
+                                <input id="newTaskTitle" type="text" placeholder="Название задачи" class="task-input" />
+                            </div>
+                            
+                            <div class="task-input-row">
+                                <textarea id="newTaskDesc" placeholder="Описание задачи" class="task-input" style="height: 80px; resize: vertical"></textarea>
+                            </div>
+
+                            <div class="datetime-row">
+                                <input id="newTaskDate" type="date" class="date-input" />
+                                <input id="newTaskTime" type="time" class="time-input" />
+                            </div>
+
+                            <div class="task-input-row">
+                                <select id="newTaskPriority" class="task-input">
+                                    <option value="medium">Средний приоритет</option>
+                                    <option value="high">Высокий приоритет</option>
+                                    <option value="low">Низкий приоритет</option>
+                                </select>
+                            </div>
+                            
+                            <div class="add-button-row">
+                                <button id="addTaskBtn" class="save">Добавить задачу</button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Stats -->
@@ -837,43 +873,6 @@
                         <div class="tasks" id="tasks-completed">
                             <div class="empty-state">Нет завершённых задач</div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Add Task Overlay -->
-        <div id="addTaskOverlay" class="edit-overlay">
-            <div class="edit-form">
-                <div class="edit-form-header">
-                    <h3>Добавить задачу</h3>
-                    <button class="close-btn" onclick="closeAddTaskForm()">×</button>
-                </div>
-                <div class="add-task-form">
-                    <div class="task-input-row">
-                        <input id="newTaskTitle" type="text" placeholder="Название задачи" class="task-input" />
-                    </div>
-                    
-                    <div class="task-input-row">
-                        <textarea id="newTaskDesc" placeholder="Описание задачи" class="task-input" style="height: 80px; resize: vertical"></textarea>
-                    </div>
-
-                    <div class="datetime-row">
-                        <input id="newTaskDate" type="date" class="date-input" />
-                        <input id="newTaskTime" type="time" class="time-input" />
-                    </div>
-
-                    <div class="task-input-row">
-                        <select id="newTaskPriority" class="task-input">
-                            <option value="medium">Средний приоритет</option>
-                            <option value="high">Высокий приоритет</option>
-                            <option value="low">Низкий приоритет</option>
-                        </select>
-                    </div>
-                    
-                    <div class="add-button-row">
-                        <button id="addTaskBtn" class="save">Добавить задачу</button>
-                        <button class="secondary" onclick="closeAddTaskForm()">Отмена</button>
                     </div>
                 </div>
             </div>
@@ -1018,39 +1017,112 @@
         // ==================== КОНФИГУРАЦИЯ ====================
         const CONFIG = {
             API_BASE: 'https://your-1c-server.com/api',
-            SESSION_TIMEOUT: 24 * 60 * 60 * 1000,
+            SESSION_TIMEOUT: 24 * 60 * 60 * 1000, // 24 часа
             DEMO_USERS: {
-                'user1': '123456',
-                'user2': '123456', 
-                'admin': 'admin123'
+                'user1': { password: '123456', role: 'Менеджер', department: 'Отдел продаж' },
+                'user2': { password: '123456', role: 'Разработчик', department: 'IT отдел' },
+                'admin': { password: 'admin123', role: 'Администратор', department: 'Администрация' }
+            },
+            DEMO_TASKS: {
+                'user1': [
+                    {
+                        id: 'task1',
+                        title: 'Подготовить коммерческое предложение',
+                        description: 'Для нового клиента ООО "Ромашка"',
+                        date: new Date().toISOString().split('T')[0],
+                        time: '10:00',
+                        priority: 'high',
+                        status: 'new',
+                        createdAt: new Date().toISOString(),
+                        userId: 'user1'
+                    },
+                    {
+                        id: 'task2', 
+                        title: 'Согласовать договор',
+                        description: 'С юридическим отделом',
+                        date: new Date().toISOString().split('T')[0],
+                        time: '14:00',
+                        priority: 'medium',
+                        status: 'in-progress',
+                        createdAt: new Date().toISOString(),
+                        userId: 'user1'
+                    }
+                ],
+                'user2': [
+                    {
+                        id: 'task3',
+                        title: 'Разработать новый модуль',
+                        description: 'Интеграция с 1С API',
+                        date: new Date().toISOString().split('T')[0],
+                        time: '09:00',
+                        priority: 'high',
+                        status: 'in-progress',
+                        createdAt: new Date().toISOString(),
+                        userId: 'user2'
+                    },
+                    {
+                        id: 'task4',
+                        title: 'Исправить баги в интерфейсе',
+                        description: 'Проблемы с отображением на мобильных устройствах',
+                        date: new Date().toISOString().split('T')[0],
+                        time: '16:00',
+                        priority: 'medium',
+                        status: 'completed',
+                        createdAt: new Date().toISOString(),
+                        userId: 'user2'
+                    }
+                ],
+                'admin': [
+                    {
+                        id: 'task5',
+                        title: 'Настройка системы',
+                        description: 'Конфигурация прав доступа для сотрудников',
+                        date: new Date().toISOString().split('T')[0],
+                        time: '11:00',
+                        priority: 'high',
+                        status: 'new',
+                        createdAt: new Date().toISOString(),
+                        userId: 'admin'
+                    }
+                ]
             }
         };
 
         // ==================== УТИЛИТЫ ====================
         class Utils {
-            static pad(n) {
-                return n < 10 ? '0' + n : n;
-            }
-
             static formatDate(date) {
-                return `${date.getFullYear()}-${this.pad(date.getMonth() + 1)}-${this.pad(date.getDate())}`;
+                const d = new Date(date);
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
             }
 
-            static debounce(func, wait) {
-                let timeout;
-                return function executedFunction(...args) {
-                    const later = () => {
-                        clearTimeout(timeout);
-                        func(...args);
-                    };
-                    clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
-                };
+            static formatTime(date) {
+                const d = new Date(date);
+                const hours = String(d.getHours()).padStart(2, '0');
+                const minutes = String(d.getMinutes()).padStart(2, '0');
+                return `${hours}:${minutes}`;
             }
 
-            static validateTime(time) {
-                const v = parseFloat(time);
-                return !isNaN(v) && v >= 0 && (v * 10) % 5 === 0;
+            static generateId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            }
+
+            static escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            static formatDisplayDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('ru-RU');
+            }
+
+            static validateHours(hours) {
+                const h = parseFloat(hours);
+                return !isNaN(h) && h >= 0.5 && h <= 24 && (h * 2) % 1 === 0;
             }
         }
 
@@ -1059,6 +1131,7 @@
             constructor() {
                 this.AUTH_KEY = 'tm_auth';
                 this.currentUser = null;
+                this.userProfile = null;
             }
 
             checkAuth() {
@@ -1071,13 +1144,16 @@
                 try {
                     const authData = JSON.parse(authRaw);
                     
+                    // Проверка времени сессии
                     if (Date.now() - authData.timestamp > CONFIG.SESSION_TIMEOUT) {
+                        localStorage.removeItem(this.AUTH_KEY);
                         this.showAuth();
                         return false;
                     }
 
                     this.currentUser = authData.username;
-                    document.getElementById('currentUserDisplay').textContent = this.currentUser;
+                    this.userProfile = authData.profile;
+                    this.updateUserDisplay();
                     this.hideAuth();
                     return true;
                 } catch (e) {
@@ -1095,25 +1171,38 @@
                     return;
                 }
 
-                // Демо-проверка
-                if (CONFIG.DEMO_USERS[username] && CONFIG.DEMO_USERS[username] === password) {
+                // Проверка демо-пользователей
+                const userData = CONFIG.DEMO_USERS[username];
+                if (userData && userData.password === password) {
                     this.currentUser = username;
+                    this.userProfile = {
+                        username: username,
+                        role: userData.role,
+                        department: userData.department,
+                        loginTime: new Date().toISOString()
+                    };
+
                     const authData = { 
-                        username, 
+                        username: username,
+                        profile: this.userProfile,
                         timestamp: Date.now(),
                         token: this.generateToken()
                     };
+                    
                     localStorage.setItem(this.AUTH_KEY, JSON.stringify(authData));
-                    document.getElementById('currentUserDisplay').textContent = username;
+                    this.updateUserDisplay();
                     this.hideAuth();
+                    
+                    // Инициализация данных пользователя
+                    this.initializeUserData();
                     
                     // Загружаем данные
                     syncManager.loadFrom1C().then(() => {
                         taskManager.render();
-                        syncManager.updateSyncStatus('Успешно загружено', 'success');
+                        syncManager.updateSyncStatus('Успешный вход', 'synced');
                     }).catch(() => {
                         taskManager.render();
-                        syncManager.updateSyncStatus('Офлайн режим', 'error');
+                        syncManager.updateSyncStatus('Офлайн режим', '');
                     });
                 } else {
                     alert('Неверное имя пользователя или пароль');
@@ -1123,7 +1212,10 @@
             logout() {
                 if (confirm('Вы уверены, что хотите выйти?')) {
                     localStorage.removeItem(this.AUTH_KEY);
+                    localStorage.removeItem(this.getUserKey());
+                    localStorage.removeItem(this.getUserKey() + '_events');
                     this.currentUser = null;
+                    this.userProfile = null;
                     this.showAuth();
                 }
             }
@@ -1131,11 +1223,33 @@
             showAuth() {
                 document.getElementById('authOverlay').style.display = 'flex';
                 document.getElementById('appRoot').style.display = 'none';
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+                document.getElementById('username').focus();
             }
 
             hideAuth() {
                 document.getElementById('authOverlay').style.display = 'none';
                 document.getElementById('appRoot').style.display = 'block';
+            }
+
+            updateUserDisplay() {
+                const display = document.getElementById('currentUserDisplay');
+                if (this.userProfile) {
+                    display.textContent = `${this.userProfile.username} (${this.userProfile.role})`;
+                } else {
+                    display.textContent = this.currentUser;
+                }
+            }
+
+            initializeUserData() {
+                const userKey = this.getUserKey();
+                if (!localStorage.getItem(userKey)) {
+                    // Загружаем демо-данные для пользователя
+                    const userTasks = CONFIG.DEMO_TASKS[this.currentUser] || [];
+                    localStorage.setItem(userKey, JSON.stringify(userTasks));
+                    localStorage.setItem(userKey + '_events', JSON.stringify([]));
+                }
             }
 
             generateToken() {
@@ -1272,7 +1386,7 @@
             }
         }
 
-        // ==================== ЗАДАЧИ И СОБЫТИЯ ====================
+        // ==================== МЕНЕДЖЕР ЗАДАЧ ====================
         class TaskManager {
             constructor() {
                 this.tasks = [];
@@ -1293,9 +1407,8 @@
                 }
             }
 
-            saveTasks(data) {
-                localStorage.setItem(authManager.getUserKey(), JSON.stringify(data));
-                syncManager.syncWith1C();
+            saveTasks() {
+                localStorage.setItem(authManager.getUserKey(), JSON.stringify(this.tasks));
             }
 
             loadEvents() {
@@ -1308,15 +1421,19 @@
                 }
             }
 
-            saveEvents(data) {
-                localStorage.setItem(authManager.getUserKey() + '_events', JSON.stringify(data));
+            saveEvents() {
+                localStorage.setItem(authManager.getUserKey() + '_events', JSON.stringify(this.events));
+            }
+
+            initialize() {
+                this.tasks = this.loadTasks();
+                this.events = this.loadEvents();
             }
 
             render() {
                 if (!authManager.currentUser) return;
                 
-                this.tasks = this.loadTasks();
-                this.events = this.loadEvents();
+                this.initialize();
                 
                 const newTasksContainer = document.getElementById('tasks-new');
                 const inProgressTasksContainer = document.getElementById('tasks-in-progress');
@@ -1332,12 +1449,12 @@
                     if (!this.searchTerm) return true;
                     
                     const taskMatches = task.title.toLowerCase().includes(this.searchTerm) || 
-                                      task.description.toLowerCase().includes(this.searchTerm);
+                                      (task.description && task.description.toLowerCase().includes(this.searchTerm));
                     
                     const taskEvents = this.events.filter(event => event.taskId === task.id);
                     const eventMatches = taskEvents.some(event => 
                         event.title.toLowerCase().includes(this.searchTerm) || 
-                        event.description.toLowerCase().includes(this.searchTerm)
+                        (event.description && event.description.toLowerCase().includes(this.searchTerm))
                     );
                     
                     return taskMatches || eventMatches;
@@ -1376,15 +1493,6 @@
                     completedTasksContainer.innerHTML = '<div class="empty-state">Нет завершённых задач</div>';
                 }
 
-                // Add add task button to new column (only when not searching)
-                if (!this.searchTerm) {
-                    const addTaskBtn = document.createElement('button');
-                    addTaskBtn.className = 'add-task-btn';
-                    addTaskBtn.innerHTML = '+ Добавить задачу';
-                    addTaskBtn.onclick = () => this.openAddTaskForm();
-                    newTasksContainer.appendChild(addTaskBtn);
-                }
-
                 this.updateStats();
             }
 
@@ -1392,15 +1500,15 @@
                 const taskElement = document.createElement('div');
                 taskElement.className = 'task-item';
                 
-                const taskDateTime = `${this.formatDisplayDate(task.date)} ${task.time}`;
+                const taskDateTime = `${Utils.formatDisplayDate(task.date)} ${task.time}`;
                 const totalTaskHours = taskEvents.reduce((sum, event) => sum + event.hours, 0);
                 
                 taskElement.innerHTML = `
                     <div class="task-header" onclick="taskManager.toggleTaskEvents('${task.id}')">
-                        <div class="task-title">${this.escapeHtml(task.title)}</div>
+                        <div class="task-title">${Utils.escapeHtml(task.title)}</div>
                         <button class="task-toggle">▼</button>
                     </div>
-                    <div class="task-description">${this.escapeHtml(task.description) || 'Нет описания'}</div>
+                    <div class="task-description">${Utils.escapeHtml(task.description) || 'Нет описания'}</div>
                     <div class="task-meta">
                         <span>${taskDateTime}</span>
                         <span>Часы: ${totalTaskHours.toFixed(1)}</span>
@@ -1420,63 +1528,128 @@
             }
 
             renderTaskEvents(taskEvents, taskId) {
-                let eventsHTML = '';
-                
                 if (taskEvents.length === 0) {
-                    eventsHTML = '<div class="empty-state" style="padding: 20px; font-size: 12px;">Нет событий для этой задачи</div>';
-                } else {
-                    eventsHTML = taskEvents.map(event => `
-                        <div class="event-item">
-                            <div class="event-header">
-                                <div class="event-title">${this.escapeHtml(event.title)}</div>
-                                <div class="event-hours">${event.hours}ч</div>
-                            </div>
-                            <div class="event-description">${this.escapeHtml(event.description) || 'Нет описания'}</div>
-                            <div class="event-meta">
-                                <span>Начало: ${this.formatDisplayDate(event.startDate)} ${event.startTime}</span>
-                                <span>Окончание: ${this.formatDisplayDate(event.endDate)} ${event.endTime}</span>
-                            </div>
-                            <div class="event-actions">
-                                <button class="secondary" onclick="taskManager.openEditEventForm('${event.id}')">Изменить</button>
-                                <button class="danger" onclick="taskManager.deleteEvent('${event.id}')">Удалить</button>
-                            </div>
-                        </div>
-                    `).join('');
+                    return '<div class="empty-state" style="padding: 20px; font-size: 12px;">Нет событий для этой задачи</div>';
                 }
+
+                const eventsHTML = taskEvents.map(event => `
+                    <div class="event-item">
+                        <div class="event-header">
+                            <div class="event-title">${Utils.escapeHtml(event.title)}</div>
+                            <div class="event-hours">${event.hours}ч</div>
+                        </div>
+                        <div class="event-description">${Utils.escapeHtml(event.description) || 'Нет описания'}</div>
+                        <div class="event-meta">
+                            <span>Начало: ${Utils.formatDisplayDate(event.startDate)} ${event.startTime}</span>
+                            <span>Окончание: ${Utils.formatDisplayDate(event.endDate)} ${event.endTime}</span>
+                        </div>
+                        <div class="event-actions">
+                            <button class="secondary" onclick="taskManager.openEditEventForm('${event.id}')">Изменить</button>
+                            <button class="danger" onclick="taskManager.deleteEvent('${event.id}')">Удалить</button>
+                        </div>
+                    </div>
+                `).join('');
                 
-                eventsHTML += `
+                return eventsHTML + `
                     <button class="add-event-btn" onclick="taskManager.openAddEventForm('${taskId}')">
                         + Добавить событие
                     </button>
                 `;
-                
-                return eventsHTML;
             }
 
+            // ========== ФОРМЫ ЗАДАЧ ==========
             openAddTaskForm() {
-                const today = new Date().toISOString().split('T')[0];
-                const now = new Date();
-                const timeString = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+                const today = Utils.formatDate(new Date());
+                const now = Utils.formatTime(new Date());
                 
                 document.getElementById('newTaskDate').value = today;
-                document.getElementById('newTaskTime').value = timeString;
+                document.getElementById('newTaskTime').value = now;
                 document.getElementById('newTaskTitle').value = '';
                 document.getElementById('newTaskDesc').value = '';
-                
-                document.getElementById('addTaskOverlay').classList.add('active');
+                document.getElementById('newTaskPriority').value = 'medium';
             }
 
-            closeAddTaskForm() {
-                document.getElementById('addTaskOverlay').classList.remove('active');
+            addTask() {
+                const title = document.getElementById('newTaskTitle').value;
+                const description = document.getElementById('newTaskDesc').value;
+                const date = document.getElementById('newTaskDate').value;
+                const time = document.getElementById('newTaskTime').value;
+                const priority = document.getElementById('newTaskPriority').value;
+
+                if (!title.trim()) {
+                    alert('Пожалуйста, введите название задачи');
+                    return;
+                }
+
+                const task = {
+                    id: Utils.generateId(),
+                    title: title.trim(),
+                    description: description.trim(),
+                    date: date,
+                    time: time,
+                    priority: priority,
+                    status: 'new',
+                    createdAt: new Date().toISOString(),
+                    userId: authManager.currentUser
+                };
+
+                this.tasks.push(task);
+                this.saveTasks();
+                this.render();
+                this.updateTaskSelect();
+                syncManager.simulateSync();
+
+                // Очистка формы
+                document.getElementById('newTaskTitle').value = '';
+                document.getElementById('newTaskDesc').value = '';
             }
 
+            openEditTaskForm(taskId) {
+                const task = this.tasks.find(t => t.id === taskId);
+                if (task) {
+                    this.currentEditingTaskId = taskId;
+                    document.getElementById('editTaskTitle').value = task.title;
+                    document.getElementById('editTaskDesc').value = task.description || '';
+                    document.getElementById('editTaskDate').value = task.date;
+                    document.getElementById('editTaskTime').value = task.time;
+                    document.getElementById('editTaskPriority').value = task.priority;
+                    document.getElementById('editTaskStatus').value = task.status;
+                    document.getElementById('editTaskOverlay').classList.add('active');
+                }
+            }
+
+            closeEditTaskForm() {
+                document.getElementById('editTaskOverlay').classList.remove('active');
+                this.currentEditingTaskId = null;
+            }
+
+            saveTaskChanges() {
+                if (!this.currentEditingTaskId) return;
+
+                const task = this.tasks.find(t => t.id === this.currentEditingTaskId);
+                if (task) {
+                    task.title = document.getElementById('editTaskTitle').value;
+                    task.description = document.getElementById('editTaskDesc').value;
+                    task.date = document.getElementById('editTaskDate').value;
+                    task.time = document.getElementById('editTaskTime').value;
+                    task.priority = document.getElementById('editTaskPriority').value;
+                    task.status = document.getElementById('editTaskStatus').value;
+
+                    this.saveTasks();
+                    this.render();
+                    this.updateTaskSelect();
+                    this.closeEditTaskForm();
+                    syncManager.simulateSync();
+                }
+            }
+
+            // ========== ФОРМЫ СОБЫТИЙ ==========
             openAddEventForm(taskId = null) {
-                const today = new Date().toISOString().split('T')[0];
-                const now = new Date();
-                const timeString = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+                const today = Utils.formatDate(new Date());
+                const now = Utils.formatTime(new Date());
                 
                 document.getElementById('newEventStartDate').value = today;
-                document.getElementById('newEventStartTime').value = timeString;
+                document.getElementById('newEventStartTime').value = now;
                 document.getElementById('newEventTitle').value = '';
                 document.getElementById('newEventDesc').value = '';
                 document.getElementById('newEventHours').value = '1.0';
@@ -1508,44 +1681,12 @@
                     const startDateTime = new Date(`${startDate}T${startTime}`);
                     const endDateTime = new Date(startDateTime.getTime() + (hours * 60 * 60 * 1000));
                     
-                    const endDate = endDateTime.toISOString().split('T')[0];
-                    const endTime = endDateTime.toTimeString().slice(0, 5);
+                    const endDate = Utils.formatDate(endDateTime);
+                    const endTime = Utils.formatTime(endDateTime);
                     
                     document.getElementById('newEventEndDate').value = endDate;
                     document.getElementById('newEventEndTime').value = endTime;
                 }
-            }
-
-            addTask() {
-                const title = document.getElementById('newTaskTitle').value;
-                const description = document.getElementById('newTaskDesc').value;
-                const date = document.getElementById('newTaskDate').value;
-                const time = document.getElementById('newTaskTime').value;
-                const priority = document.getElementById('newTaskPriority').value;
-
-                if (!title.trim()) {
-                    alert('Пожалуйста, введите название задачи');
-                    return;
-                }
-
-                const task = {
-                    id: this.generateId(),
-                    title: title.trim(),
-                    description: description.trim(),
-                    date: date,
-                    time: time,
-                    priority,
-                    status: 'new',
-                    createdAt: new Date().toISOString(),
-                    userId: authManager.currentUser
-                };
-
-                this.tasks.push(task);
-                this.saveTasks(this.tasks);
-                this.render();
-                this.updateTaskSelect();
-                this.closeAddTaskForm();
-                syncManager.simulateSync();
             }
 
             addEvent() {
@@ -1562,52 +1703,31 @@
                 const startDate = document.getElementById('newEventStartDate').value;
                 const startTime = document.getElementById('newEventStartTime').value;
                 const hours = parseFloat(document.getElementById('newEventHours').value);
-                const endDate = document.getElementById('newEventEndDate').value;
-                const endTime = document.getElementById('newEventEndTime').value;
 
-                if (!taskId || !title.trim() || !startDate || !startTime || isNaN(hours) || hours <= 0) {
-                    alert('Пожалуйста, заполните все поля события корректно');
+                if (!taskId || !title.trim() || !startDate || !startTime || !Utils.validateHours(hours)) {
+                    alert('Пожалуйста, заполните все поля события корректно. Часы должны быть от 0.5 до 24 с шагом 0.5');
                     return;
                 }
 
                 const event = {
-                    id: this.generateId(),
-                    taskId,
+                    id: Utils.generateId(),
+                    taskId: taskId,
                     title: title.trim(),
                     description: description.trim(),
-                    startDate,
-                    startTime,
-                    endDate,
-                    endTime,
-                    hours,
+                    startDate: startDate,
+                    startTime: startTime,
+                    endDate: document.getElementById('newEventEndDate').value,
+                    endTime: document.getElementById('newEventEndTime').value,
+                    hours: hours,
                     createdAt: new Date().toISOString(),
                     userId: authManager.currentUser
                 };
 
                 this.events.push(event);
-                this.saveEvents(this.events);
+                this.saveEvents();
                 this.render();
                 this.closeAddEventForm();
                 syncManager.simulateSync();
-            }
-
-            openEditTaskForm(taskId) {
-                const task = this.tasks.find(t => t.id === taskId);
-                if (task) {
-                    this.currentEditingTaskId = taskId;
-                    document.getElementById('editTaskTitle').value = task.title;
-                    document.getElementById('editTaskDesc').value = task.description;
-                    document.getElementById('editTaskDate').value = task.date;
-                    document.getElementById('editTaskTime').value = task.time;
-                    document.getElementById('editTaskPriority').value = task.priority;
-                    document.getElementById('editTaskStatus').value = task.status;
-                    document.getElementById('editTaskOverlay').classList.add('active');
-                }
-            }
-
-            closeEditTaskForm() {
-                document.getElementById('editTaskOverlay').classList.remove('active');
-                this.currentEditingTaskId = null;
             }
 
             openEditEventForm(eventId) {
@@ -1616,23 +1736,14 @@
                     this.currentEditingEventId = eventId;
                     document.getElementById('editEventTask').value = event.taskId;
                     document.getElementById('editEventTitle').value = event.title;
-                    document.getElementById('editEventDesc').value = event.description;
+                    document.getElementById('editEventDesc').value = event.description || '';
                     document.getElementById('editEventStartDate').value = event.startDate;
                     document.getElementById('editEventStartTime').value = event.startTime;
                     document.getElementById('editEventHours').value = event.hours;
                     document.getElementById('editEventEndDate').value = event.endDate;
                     document.getElementById('editEventEndTime').value = event.endTime;
                     
-                    const editEventTaskSelect = document.getElementById('editEventTask');
-                    editEventTaskSelect.innerHTML = '<option value="">Выберите задачу</option>';
-                    this.tasks.forEach(task => {
-                        const option = document.createElement('option');
-                        option.value = task.id;
-                        option.textContent = task.title;
-                        editEventTaskSelect.appendChild(option);
-                    });
-                    editEventTaskSelect.value = event.taskId;
-                    
+                    this.updateEditEventTaskSelect();
                     document.getElementById('editEventOverlay').classList.add('active');
                 }
             }
@@ -1640,26 +1751,6 @@
             closeEditEventForm() {
                 document.getElementById('editEventOverlay').classList.remove('active');
                 this.currentEditingEventId = null;
-            }
-
-            saveTaskChanges() {
-                if (!this.currentEditingTaskId) return;
-
-                const task = this.tasks.find(t => t.id === this.currentEditingTaskId);
-                if (task) {
-                    task.title = document.getElementById('editTaskTitle').value;
-                    task.description = document.getElementById('editTaskDesc').value;
-                    task.date = document.getElementById('editTaskDate').value;
-                    task.time = document.getElementById('editTaskTime').value;
-                    task.priority = document.getElementById('editTaskPriority').value;
-                    task.status = document.getElementById('editTaskStatus').value;
-
-                    this.saveTasks(this.tasks);
-                    this.render();
-                    this.updateTaskSelect();
-                    this.closeEditTaskForm();
-                    syncManager.simulateSync();
-                }
             }
 
             saveEventChanges() {
@@ -1676,13 +1767,14 @@
                     event.endDate = document.getElementById('editEventEndDate').value;
                     event.endTime = document.getElementById('editEventEndTime').value;
 
-                    this.saveEvents(this.events);
+                    this.saveEvents();
                     this.render();
                     this.closeEditEventForm();
                     syncManager.simulateSync();
                 }
             }
 
+            // ========== ОСНОВНЫЕ ОПЕРАЦИИ ==========
             toggleTaskEvents(taskId) {
                 const eventsContainer = document.getElementById(`events-${taskId}`);
                 const toggleButton = eventsContainer.previousElementSibling.previousElementSibling.querySelector('.task-toggle');
@@ -1695,7 +1787,7 @@
                 const task = this.tasks.find(t => t.id === taskId);
                 if (task) {
                     task.status = status;
-                    this.saveTasks(this.tasks);
+                    this.saveTasks();
                     this.render();
                     syncManager.simulateSync();
                 }
@@ -1705,8 +1797,8 @@
                 if (confirm('Удалить задачу и все связанные события?')) {
                     this.tasks = this.tasks.filter(t => t.id !== taskId);
                     this.events = this.events.filter(e => e.taskId !== taskId);
-                    this.saveTasks(this.tasks);
-                    this.saveEvents(this.events);
+                    this.saveTasks();
+                    this.saveEvents();
                     this.render();
                     this.updateTaskSelect();
                     syncManager.simulateSync();
@@ -1716,26 +1808,36 @@
             deleteEvent(eventId) {
                 if (confirm('Удалить событие?')) {
                     this.events = this.events.filter(e => e.id !== eventId);
-                    this.saveEvents(this.events);
+                    this.saveEvents();
                     this.render();
                     syncManager.simulateSync();
                 }
             }
 
             updateTaskSelect() {
-                const selects = ['eventTaskSelect'];
-                selects.forEach(selectId => {
-                    const select = document.getElementById(selectId);
-                    if (select) {
-                        select.innerHTML = '<option value="">Выберите задачу</option>';
-                        this.tasks.forEach(task => {
-                            const option = document.createElement('option');
-                            option.value = task.id;
-                            option.textContent = task.title;
-                            select.appendChild(option);
-                        });
-                    }
-                });
+                const select = document.getElementById('eventTaskSelect');
+                if (select) {
+                    select.innerHTML = '<option value="">Выберите задачу</option>';
+                    this.tasks.forEach(task => {
+                        const option = document.createElement('option');
+                        option.value = task.id;
+                        option.textContent = task.title;
+                        select.appendChild(option);
+                    });
+                }
+            }
+
+            updateEditEventTaskSelect() {
+                const select = document.getElementById('editEventTask');
+                if (select) {
+                    select.innerHTML = '<option value="">Выберите задачу</option>';
+                    this.tasks.forEach(task => {
+                        const option = document.createElement('option');
+                        option.value = task.id;
+                        option.textContent = task.title;
+                        select.appendChild(option);
+                    });
+                }
             }
 
             updateStats() {
@@ -1756,14 +1858,14 @@
             }
 
             updateTimeStats() {
-                const today = new Date().toISOString().split('T')[0];
+                const today = Utils.formatDate(new Date());
                 const weekStart = new Date();
                 weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-                const weekStartStr = weekStart.toISOString().split('T')[0];
+                const weekStartStr = Utils.formatDate(weekStart);
                 
                 const monthStart = new Date();
                 monthStart.setDate(1);
-                const monthStartStr = monthStart.toISOString().split('T')[0];
+                const monthStartStr = Utils.formatDate(monthStart);
 
                 const todayHours = this.events
                     .filter(event => event.startDate === today)
@@ -1781,46 +1883,38 @@
                 document.getElementById('statWeek').textContent = weekHours.toFixed(1) + 'ч';
                 document.getElementById('statMonth').textContent = monthHours.toFixed(1) + 'ч';
             }
-
-            // Utility functions
-            generateId() {
-                return Date.now().toString(36) + Math.random().toString(36).substr(2);
-            }
-
-            escapeHtml(text) {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-
-            formatDisplayDate(dateString) {
-                const date = new Date(dateString);
-                return date.toLocaleDateString('ru-RU');
-            }
         }
 
-        // ==================== СИНХРОНИЗАЦИЯ ====================
+        // ==================== СИНХРОНИЗАЦИЯ С 1С ====================
         class SyncManager {
             constructor() {
                 this.syncStatusEl = document.getElementById('syncStatus');
             }
 
             async syncWith1C() {
-                this.updateSyncStatus('Синхронизация...', '');
+                this.updateSyncStatus('Синхронизация с 1С...', '');
                 
                 try {
-                    const tasks = taskManager.loadTasks();
-                    const events = taskManager.loadEvents();
+                    const tasks = taskManager.tasks;
+                    const events = taskManager.events;
                     const authData = JSON.parse(localStorage.getItem(authManager.AUTH_KEY));
                     
-                    // Заглушка для 1С API
-                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    // Имитация запроса к 1С API
+                    await new Promise(resolve => setTimeout(resolve, 2000));
                     
-                    const success = Math.random() > 0.1;
+                    // В реальности здесь был бы fetch к API 1С
+                    const success = Math.random() > 0.2; // 80% успешных синхронизаций
+                    
                     if (success) {
-                        this.updateSyncStatus('Синхронизировано', 'synced');
+                        this.updateSyncStatus('Синхронизировано с 1С', 'synced');
+                        
+                        // Имитация получения обновленных данных из 1С
+                        const updatedTasks = this.simulate1CResponse(tasks);
+                        taskManager.tasks = updatedTasks;
+                        taskManager.saveTasks();
+                        taskManager.render();
                     } else {
-                        throw new Error('Ошибка сервера');
+                        throw new Error('Ошибка подключения к 1С');
                     }
                 } catch (error) {
                     console.error('Ошибка синхронизации с 1С:', error);
@@ -1830,31 +1924,32 @@
 
             async loadFrom1C() {
                 try {
-                    // Заглушка для загрузки из 1С
+                    // Имитация загрузки из 1С
                     await new Promise(resolve => setTimeout(resolve, 1000));
                     
-                    // В реальности здесь был бы fetch к API 1С
-                    const demoData = [
-                        { 
-                            id: 'demo1', 
-                            title: 'Пример задачи из 1С', 
-                            description: 'Загружено из системы 1С', 
-                            date: new Date().toISOString().split('T')[0], 
-                            time: '12:00',
-                            priority: 'medium',
-                            status: 'new',
-                            createdAt: new Date().toISOString(),
-                            userId: authManager.currentUser
-                        }
-                    ];
+                    // В реальности здесь был бы fetch к API 1С для получения данных пользователя
+                    const userTasks = taskManager.loadTasks();
+                    const userEvents = taskManager.loadEvents();
                     
-                    localStorage.setItem(authManager.getUserKey(), JSON.stringify(demoData));
-                    localStorage.setItem(authManager.getUserKey() + '_events', JSON.stringify([]));
-                    return demoData;
+                    // Если у пользователя нет данных, используем демо-данные
+                    if (userTasks.length === 0) {
+                        authManager.initializeUserData();
+                    }
+                    
+                    return userTasks;
                 } catch (error) {
                     console.warn('Используем локальные данные:', error);
                     return taskManager.loadTasks();
                 }
+            }
+
+            simulate1CResponse(tasks) {
+                // Имитация обработки данных в 1С
+                return tasks.map(task => ({
+                    ...task,
+                    lastSync: new Date().toISOString(),
+                    syncVersion: '1C-v1.0'
+                }));
             }
 
             updateSyncStatus(message, type = '') {
@@ -1919,6 +2014,13 @@
                 document.getElementById('newEventStartDate').addEventListener('change', () => taskManager.calculateEndDateTime());
                 document.getElementById('newEventStartTime').addEventListener('change', () => taskManager.calculateEndDateTime());
                 document.getElementById('newEventHours').addEventListener('input', () => taskManager.calculateEndDateTime());
+                
+                // Автовход по Enter в форме авторизации
+                document.getElementById('password').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        authManager.login();
+                    }
+                });
             }
 
             applyTheme(dark) {
@@ -1946,48 +2048,15 @@
                 taskManager.render();
                 this.applyTheme(this.dark);
                 
-                // Демо-данные для новых пользователей
-                if (!localStorage.getItem(authManager.getUserKey())) {
-                    const sampleTasks = [
-                        { 
-                            id: 'demo1', 
-                            title: 'Пример задачи 1', 
-                            description: 'Это пример задачи с описанием', 
-                            date: new Date().toISOString().split('T')[0], 
-                            time: '10:00',
-                            priority: 'high',
-                            status: 'new',
-                            createdAt: new Date().toISOString(),
-                            userId: authManager.currentUser
-                        },
-                        { 
-                            id: 'demo2', 
-                            title: 'Пример задачи 2', 
-                            description: 'Завершенная задача', 
-                            date: new Date().toISOString().split('T')[0], 
-                            time: '14:00',
-                            priority: 'medium',
-                            status: 'completed',
-                            createdAt: new Date().toISOString(),
-                            userId: authManager.currentUser
-                        }
-                    ];
-                    localStorage.setItem(authManager.getUserKey(), JSON.stringify(sampleTasks));
-                    localStorage.setItem(authManager.getUserKey() + '_events', JSON.stringify([]));
-                    taskManager.render();
-                }
-                
-                // Загружаем данные из 1С
-                syncManager.loadFrom1C().then(() => {
-                    taskManager.render();
-                    syncManager.updateSyncStatus('Синхронизировано', 'synced');
-                }).catch(() => {
-                    syncManager.updateSyncStatus('Офлайн режим', '');
-                });
+                // Установка сегодняшней даты по умолчанию
+                const today = Utils.formatDate(new Date());
+                const now = Utils.formatTime(new Date());
+                document.getElementById('newTaskDate').value = today;
+                document.getElementById('newTaskTime').value = now;
             }
         }
 
-        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+        // ==================== ИНИЦИАЛИЗАЦИЯ ГЛОБАЛЬНЫХ ОБЪЕКТОВ ====================
         const authManager = new AuthManager();
         const taskManager = new TaskManager();
         const syncManager = new SyncManager();
@@ -1995,13 +2064,12 @@
 
         // Глобальные функции для вызова из HTML
         window.syncWith1C = () => syncManager.syncWith1C();
-        window.openAddTaskForm = () => taskManager.openAddTaskForm();
-        window.closeAddTaskForm = () => taskManager.closeAddTaskForm();
         window.closeAddEventForm = () => taskManager.closeAddEventForm();
         window.closeEditTaskForm = () => taskManager.closeEditTaskForm();
         window.closeEditEventForm = () => taskManager.closeEditEventForm();
         window.toggleTaskEvents = (taskId) => taskManager.toggleTaskEvents(taskId);
 
+        // Инициализация при загрузке DOM
         document.addEventListener('DOMContentLoaded', () => {
             app = new App();
         });
