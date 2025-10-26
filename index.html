@@ -1,0 +1,1521 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Task Manager — Задачи и события с 1С интеграцией</title>
+    
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-surface: #2d2d2d;
+            --bg-elevated: #3d3d3d;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent: #4a76cf;
+            --accent-hover: #5a86df;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --error: #f44336;
+            --border: #404040;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .light {
+            --bg-primary: #f5f7fa;
+            --bg-surface: #ffffff;
+            --bg-elevated: #f8f9fa;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --accent: #4a76cf;
+            --accent-hover: #5a86df;
+            --success: #48bb78;
+            --warning: #ed8936;
+            --error: #f56565;
+            --border: #e2e8f0;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .surface {
+            background: var(--bg-surface);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        /* Header */
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .title h1 {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .title p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .search {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            font-size: 14px;
+            width: 200px;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: 300px 1fr 1fr 1fr;
+            gap: 24px;
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h3 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        /* Task Columns */
+        .task-column {
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            padding: 16px;
+            min-height: 400px;
+        }
+
+        .task-column h4 {
+            font-size: 16px;
+            margin-bottom: 16px;
+            text-align: center;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        .column-new h4 { background: rgba(74, 118, 207, 0.2); color: var(--accent); }
+        .column-in-progress h4 { background: rgba(255, 152, 0, 0.2); color: var(--warning); }
+        .column-completed h4 { background: rgba(76, 175, 80, 0.2); color: var(--success); }
+
+        .tasks {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        /* Add buttons */
+        .add-task-btn, .add-event-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .add-task-btn {
+            font-size: 14px;
+        }
+
+        .add-task-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--bg-elevated);
+        }
+
+        .add-event-btn {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            margin-top: 12px;
+            font-size: 12px;
+        }
+
+        .add-event-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--bg-elevated);
+        }
+
+        /* Forms with elevated shadows */
+        .form-elevated {
+            background: var(--bg-surface);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow-elevated);
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .task-input-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .task-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .task-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(74, 118, 207, 0.1);
+        }
+
+        .datetime-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .date-input, .time-input, .hours-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .date-input:focus, .time-input:focus, .hours-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(74, 118, 207, 0.1);
+        }
+
+        /* Styling for date inputs to match theme */
+        input[type="date"], input[type="time"] {
+            color-scheme: dark;
+        }
+
+        .light input[type="date"], .light input[type="time"] {
+            color-scheme: light;
+        }
+
+        .add-button-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .save {
+            background: var(--accent);
+            color: white;
+            border: 1px solid var(--accent);
+        }
+
+        .save:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+        }
+
+        .secondary {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .secondary:hover {
+            background: var(--bg-surface);
+            border-color: var(--accent);
+        }
+
+        .danger {
+            background: transparent;
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+
+        .danger:hover {
+            background: var(--error);
+            color: white;
+        }
+
+        /* Edit Forms Overlay */
+        .edit-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .edit-overlay.active {
+            display: flex;
+        }
+
+        .edit-form {
+            background: var(--bg-surface);
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-elevated);
+        }
+
+        .edit-form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .edit-form-header h3 {
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .close-btn:hover {
+            color: var(--text-primary);
+        }
+
+        /* Task List */
+        .task-item {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            transition: all 0.2s;
+            box-shadow: var(--shadow);
+        }
+
+        .task-item:hover {
+            border-color: var(--accent);
+            box-shadow: var(--shadow-elevated);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .task-title {
+            font-weight: 600;
+            font-size: 16px;
+            flex: 1;
+        }
+
+        .task-toggle {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+            transition: transform 0.2s;
+        }
+
+        .task-toggle:hover {
+            color: var(--text-primary);
+            transform: scale(1.1);
+        }
+
+        .task-description {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .task-actions button {
+            flex: 1;
+            padding: 10px 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Events List */
+        .events-container {
+            margin-top: 12px;
+            padding-left: 16px;
+            border-left: 2px solid var(--border);
+            display: none;
+        }
+
+        .events-container.expanded {
+            display: block;
+        }
+
+        .event-item {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .event-item:hover {
+            box-shadow: var(--shadow-elevated);
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .event-title {
+            font-weight: 600;
+            font-size: 14px;
+            flex: 1;
+        }
+
+        .event-hours {
+            background: var(--accent);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .event-description {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .event-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .event-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .event-actions button {
+            flex: 1;
+            padding: 8px 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* Summary */
+        .summary {
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat:last-child {
+            border-bottom: none;
+        }
+
+        .sub {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .sync-stat {
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 0 -12px;
+        }
+
+        .sync-stat:hover {
+            background: var(--bg-surface);
+        }
+
+        .sync-button {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .sync-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            background: var(--warning);
+            color: white;
+        }
+
+        .sync-status.synced {
+            background: var(--success);
+        }
+
+        /* Footer */
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-top: 1px solid var(--border);
+            margin-top: auto;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .task-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        /* Empty states */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .col {
+                min-height: auto;
+            }
+        }
+    </style>
+</head>
+<body class="dark">
+    <div id="appRoot">
+        <div class="surface">
+            <!-- Header -->
+            <div class="top">
+                <div class="brand">
+                    <div class="logo">TM</div>
+                    <div class="title">
+                        <h1>Task Manager</h1>
+                        <p>Система управления задачами и событиями <span id="syncStatus" class="sync-status">Офлайн</span></p>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <input id="search" class="search" placeholder="Поиск по задачам и событиям..." aria-label="Поиск" />
+                    <button id="themeBtn" class="theme-toggle" title="Переключить тему" aria-label="Тема">☼</button>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="grid">
+                <!-- Left Column - Stats -->
+                <div class="col" id="leftCol">
+                    <div class="surface">
+                        <h3>Статистика по времени</h3>
+                        <div class="stat">
+                            <div class="sub">Сегодня</div>
+                            <div id="statToday" class="stat-value">0ч</div>
+                        </div>
+                        <div class="stat">
+                            <div class="sub">На этой неделе</div>
+                            <div id="statWeek" class="stat-value">0ч</div>
+                        </div>
+                        <div class="stat">
+                            <div class="sub">В этом месяце</div>
+                            <div id="statMonth" class="stat-value">0ч</div>
+                        </div>
+                    </div>
+
+                    <div class="surface">
+                        <h3>Сводка</h3>
+                        <div class="stat">
+                            <div class="sub">Активные задачи</div>
+                            <div id="statActive" class="stat-value">0</div>
+                        </div>
+                        <div class="stat">
+                            <div class="sub">Завершённые задачи</div>
+                            <div id="statDone" class="stat-value">0</div>
+                        </div>
+                        <div class="stat">
+                            <div class="sub">Всего событий</div>
+                            <div id="statEvents" class="stat-value">0</div>
+                        </div>
+                        <div class="stat">
+                            <div class="sub">Всего часов</div>
+                            <div id="statHours" class="stat-value">0.0</div>
+                        </div>
+                        <div class="stat sync-stat" onclick="syncWith1C()">
+                            <div class="sub">Синхронизация с 1С</div>
+                            <div class="sync-button">Обновить</div>
+                        </div>
+                    </div>
+
+                    <div class="footer">
+                        <div>Всего задач: <span id="totalCount">0</span></div>
+                        <div>Активных: <span id="activeCount">0</span></div>
+                        <div>Часы: <span id="hoursCount">0.0</span></div>
+                    </div>
+                </div>
+
+                <!-- Task Columns -->
+                <div class="col">
+                    <div class="task-column column-new">
+                        <h4>Новые</h4>
+                        <div class="tasks" id="tasks-new">
+                            <div class="empty-state">Нет новых задач</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="task-column column-in-progress">
+                        <h4>В работе</h4>
+                        <div class="tasks" id="tasks-in-progress">
+                            <div class="empty-state">Нет задач в работе</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="task-column column-completed">
+                        <h4>Завершённые</h4>
+                        <div class="tasks" id="tasks-completed">
+                            <div class="empty-state">Нет завершённых задач</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Task Overlay -->
+        <div id="addTaskOverlay" class="edit-overlay">
+            <div class="edit-form">
+                <div class="edit-form-header">
+                    <h3>Добавить задачу</h3>
+                    <button class="close-btn" onclick="closeAddTaskForm()">×</button>
+                </div>
+                <div class="add-task-form">
+                    <div class="task-input-row">
+                        <input id="newTaskTitle" type="text" placeholder="Название задачи" class="task-input" />
+                    </div>
+                    
+                    <div class="task-input-row">
+                        <textarea id="newTaskDesc" placeholder="Описание задачи" class="task-input" style="height: 80px; resize: vertical"></textarea>
+                    </div>
+
+                    <div class="datetime-row">
+                        <input id="newTaskDate" type="date" class="date-input" />
+                        <input id="newTaskTime" type="time" class="time-input" />
+                    </div>
+
+                    <div class="task-input-row">
+                        <select id="newTaskPriority" class="task-input">
+                            <option value="medium">Средний приоритет</option>
+                            <option value="high">Высокий приоритет</option>
+                            <option value="low">Низкий приоритет</option>
+                        </select>
+                    </div>
+                    
+                    <div class="add-button-row">
+                        <button id="addTaskBtn" class="save">Добавить задачу</button>
+                        <button class="secondary" onclick="closeAddTaskForm()">Отмена</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Event Overlay -->
+        <div id="addEventOverlay" class="edit-overlay">
+            <div class="edit-form">
+                <div class="edit-form-header">
+                    <h3>Добавить событие к задаче</h3>
+                    <button class="close-btn" onclick="closeAddEventForm()">×</button>
+                </div>
+                <div class="add-task-form">
+                    <div class="task-input-row">
+                        <select id="eventTaskSelect" class="task-input">
+                            <option value="">Выберите задачу</option>
+                        </select>
+                    </div>
+                    
+                    <div class="task-input-row">
+                        <input id="newEventTitle" type="text" placeholder="Название события" class="task-input" />
+                    </div>
+
+                    <div class="task-input-row">
+                        <textarea id="newEventDesc" placeholder="Описание события" class="task-input" style="height: 60px; resize: vertical"></textarea>
+                    </div>
+
+                    <div class="datetime-row">
+                        <input id="newEventStartDate" type="date" class="date-input" />
+                        <input id="newEventStartTime" type="time" class="time-input" />
+                    </div>
+
+                    <div class="task-input-row">
+                        <input id="newEventHours" type="number" step="0.5" min="0.5" max="24" placeholder="Затраченные часы" class="hours-input" value="1.0" />
+                    </div>
+
+                    <div class="task-input-row">
+                        <input id="newEventEndDate" type="date" class="date-input" readonly />
+                        <input id="newEventEndTime" type="time" class="time-input" readonly />
+                    </div>
+                    
+                    <div class="add-button-row">
+                        <button id="addEventBtn" class="save">Добавить событие</button>
+                        <button class="secondary" onclick="closeAddEventForm()">Отмена</button>
+                    </div>
+                </div>
+                <div class="task-hint">Дата окончания рассчитывается автоматически</div>
+            </div>
+        </div>
+
+        <!-- Edit Task Overlay -->
+        <div id="editTaskOverlay" class="edit-overlay">
+            <div class="edit-form">
+                <div class="edit-form-header">
+                    <h3>Редактировать задачу</h3>
+                    <button class="close-btn" onclick="closeEditTaskForm()">×</button>
+                </div>
+                <div class="add-task-form">
+                    <div class="task-input-row">
+                        <input id="editTaskTitle" type="text" placeholder="Название задачи" class="task-input" />
+                    </div>
+                    
+                    <div class="task-input-row">
+                        <textarea id="editTaskDesc" placeholder="Описание задачи" class="task-input" style="height: 80px; resize: vertical"></textarea>
+                    </div>
+
+                    <div class="datetime-row">
+                        <input id="editTaskDate" type="date" class="date-input" />
+                        <input id="editTaskTime" type="time" class="time-input" />
+                    </div>
+
+                    <div class="task-input-row">
+                        <select id="editTaskPriority" class="task-input">
+                            <option value="medium">Средний приоритет</option>
+                            <option value="high">Высокий приоритет</option>
+                            <option value="low">Низкий приоритет</option>
+                        </select>
+                    </div>
+
+                    <div class="task-input-row">
+                        <select id="editTaskStatus" class="task-input">
+                            <option value="new">Новая</option>
+                            <option value="in-progress">В работе</option>
+                            <option value="completed">Завершена</option>
+                        </select>
+                    </div>
+                    
+                    <div class="add-button-row">
+                        <button id="saveTaskBtn" class="save">Сохранить изменения</button>
+                        <button class="secondary" onclick="closeEditTaskForm()">Отмена</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Event Overlay -->
+        <div id="editEventOverlay" class="edit-overlay">
+            <div class="edit-form">
+                <div class="edit-form-header">
+                    <h3>Редактировать событие</h3>
+                    <button class="close-btn" onclick="closeEditEventForm()">×</button>
+                </div>
+                <div class="add-task-form">
+                    <div class="task-input-row">
+                        <select id="editEventTask" class="task-input">
+                            <option value="">Выберите задачу</option>
+                        </select>
+                    </div>
+                    
+                    <div class="task-input-row">
+                        <input id="editEventTitle" type="text" placeholder="Название события" class="task-input" />
+                    </div>
+
+                    <div class="task-input-row">
+                        <textarea id="editEventDesc" placeholder="Описание события" class="task-input" style="height: 60px; resize: vertical"></textarea>
+                    </div>
+
+                    <div class="datetime-row">
+                        <input id="editEventStartDate" type="date" class="date-input" />
+                        <input id="editEventStartTime" type="time" class="time-input" />
+                    </div>
+
+                    <div class="task-input-row">
+                        <input id="editEventHours" type="number" step="0.5" min="0.5" max="24" placeholder="Затраченные часы" class="hours-input" value="1.0" />
+                    </div>
+
+                    <div class="task-input-row">
+                        <input id="editEventEndDate" type="date" class="date-input" readonly />
+                        <input id="editEventEndTime" type="time" class="time-input" readonly />
+                    </div>
+                    
+                    <div class="add-button-row">
+                        <button id="saveEventBtn" class="save">Сохранить изменения</button>
+                        <button class="secondary" onclick="closeEditEventForm()">Отмена</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Конфигурация
+        const CONFIG = {
+            API_BASE: 'https://your-1c-server.com/api',
+            SESSION_TIMEOUT: 24 * 60 * 60 * 1000,
+            DEMO_USERS: {
+                'user1': '123456',
+                'user2': '123456', 
+                'admin': 'admin123'
+            }
+        };
+
+        // Data storage
+        let tasks = [];
+        let events = [];
+        let currentUser = 'user1';
+        let currentEditingTaskId = null;
+        let currentEditingEventId = null;
+        let currentEventTaskId = null;
+        let searchTerm = '';
+
+        // DOM elements
+        const syncStatus = document.getElementById('syncStatus');
+        const themeBtn = document.getElementById('themeBtn');
+        const searchInput = document.getElementById('search');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default dates
+            const today = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const timeString = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            
+            document.getElementById('newTaskDate').value = today;
+            document.getElementById('newTaskTime').value = timeString;
+            document.getElementById('newEventStartDate').value = today;
+            document.getElementById('newEventStartTime').value = timeString;
+            
+            loadData();
+            renderTasks();
+            updateTaskSelect();
+            updateStats();
+            setupEventListeners();
+            simulateSync();
+            calculateEndDateTime();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('addTaskBtn').addEventListener('click', addTask);
+            document.getElementById('addEventBtn').addEventListener('click', addEvent);
+            document.getElementById('saveTaskBtn').addEventListener('click', saveTaskChanges);
+            document.getElementById('saveEventBtn').addEventListener('click', saveEventChanges);
+            themeBtn.addEventListener('click', toggleTheme);
+            searchInput.addEventListener('input', function(e) {
+                searchTerm = e.target.value.toLowerCase();
+                renderTasks();
+            });
+            
+            // Add event listeners for calculating end date/time
+            document.getElementById('newEventStartDate').addEventListener('change', calculateEndDateTime);
+            document.getElementById('newEventStartTime').addEventListener('change', calculateEndDateTime);
+            document.getElementById('newEventHours').addEventListener('input', calculateEndDateTime);
+            
+            document.getElementById('editEventStartDate').addEventListener('change', calculateEditEndDateTime);
+            document.getElementById('editEventStartTime').addEventListener('change', calculateEditEndDateTime);
+            document.getElementById('editEventHours').addEventListener('input', calculateEditEndDateTime);
+        }
+
+        function openAddTaskForm() {
+            const today = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const timeString = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            
+            document.getElementById('newTaskDate').value = today;
+            document.getElementById('newTaskTime').value = timeString;
+            document.getElementById('newTaskTitle').value = '';
+            document.getElementById('newTaskDesc').value = '';
+            
+            document.getElementById('addTaskOverlay').classList.add('active');
+        }
+
+        function closeAddTaskForm() {
+            document.getElementById('addTaskOverlay').classList.remove('active');
+        }
+
+        function openAddEventForm(taskId = null) {
+            const today = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const timeString = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            
+            document.getElementById('newEventStartDate').value = today;
+            document.getElementById('newEventStartTime').value = timeString;
+            document.getElementById('newEventTitle').value = '';
+            document.getElementById('newEventDesc').value = '';
+            document.getElementById('newEventHours').value = '1.0';
+            
+            calculateEndDateTime();
+            updateTaskSelect();
+            
+            if (taskId) {
+                document.getElementById('eventTaskSelect').value = taskId;
+                currentEventTaskId = taskId;
+            } else {
+                currentEventTaskId = null;
+            }
+            
+            document.getElementById('addEventOverlay').classList.add('active');
+        }
+
+        function closeAddEventForm() {
+            document.getElementById('addEventOverlay').classList.remove('active');
+            currentEventTaskId = null;
+        }
+
+        function calculateEndDateTime() {
+            const startDate = document.getElementById('newEventStartDate').value;
+            const startTime = document.getElementById('newEventStartTime').value;
+            const hours = parseFloat(document.getElementById('newEventHours').value) || 0;
+            
+            if (startDate && startTime && hours > 0) {
+                const startDateTime = new Date(`${startDate}T${startTime}`);
+                const endDateTime = new Date(startDateTime.getTime() + (hours * 60 * 60 * 1000));
+                
+                const endDate = endDateTime.toISOString().split('T')[0];
+                const endTime = endDateTime.toTimeString().slice(0, 5);
+                
+                document.getElementById('newEventEndDate').value = endDate;
+                document.getElementById('newEventEndTime').value = endTime;
+            }
+        }
+
+        function calculateEditEndDateTime() {
+            const startDate = document.getElementById('editEventStartDate').value;
+            const startTime = document.getElementById('editEventStartTime').value;
+            const hours = parseFloat(document.getElementById('editEventHours').value) || 0;
+            
+            if (startDate && startTime && hours > 0) {
+                const startDateTime = new Date(`${startDate}T${startTime}`);
+                const endDateTime = new Date(startDateTime.getTime() + (hours * 60 * 60 * 1000));
+                
+                const endDate = endDateTime.toISOString().split('T')[0];
+                const endTime = endDateTime.toTimeString().slice(0, 5);
+                
+                document.getElementById('editEventEndDate').value = endDate;
+                document.getElementById('editEventEndTime').value = endTime;
+            }
+        }
+
+        function addTask() {
+            const title = document.getElementById('newTaskTitle').value;
+            const description = document.getElementById('newTaskDesc').value;
+            const date = document.getElementById('newTaskDate').value;
+            const time = document.getElementById('newTaskTime').value;
+            const priority = document.getElementById('newTaskPriority').value;
+
+            if (!title.trim()) {
+                alert('Пожалуйста, введите название задачи');
+                return;
+            }
+
+            const task = {
+                id: generateId(),
+                title: title.trim(),
+                description: description.trim(),
+                date: date,
+                time: time,
+                priority,
+                status: 'new',
+                createdAt: new Date().toISOString(),
+                userId: currentUser
+            };
+
+            tasks.push(task);
+            saveData();
+            renderTasks();
+            updateTaskSelect();
+            updateStats();
+            closeAddTaskForm();
+            simulateSync();
+        }
+
+        function addEvent() {
+            let taskId;
+            
+            if (currentEventTaskId) {
+                taskId = currentEventTaskId;
+            } else {
+                taskId = document.getElementById('eventTaskSelect').value;
+            }
+            
+            const title = document.getElementById('newEventTitle').value;
+            const description = document.getElementById('newEventDesc').value;
+            const startDate = document.getElementById('newEventStartDate').value;
+            const startTime = document.getElementById('newEventStartTime').value;
+            const hours = parseFloat(document.getElementById('newEventHours').value);
+            const endDate = document.getElementById('newEventEndDate').value;
+            const endTime = document.getElementById('newEventEndTime').value;
+
+            if (!taskId || !title.trim() || !startDate || !startTime || isNaN(hours) || hours <= 0) {
+                alert('Пожалуйста, заполните все поля события корректно');
+                return;
+            }
+
+            const event = {
+                id: generateId(),
+                taskId,
+                title: title.trim(),
+                description: description.trim(),
+                startDate,
+                startTime,
+                endDate,
+                endTime,
+                hours,
+                createdAt: new Date().toISOString(),
+                userId: currentUser
+            };
+
+            events.push(event);
+            saveData();
+            renderTasks();
+            updateStats();
+            closeAddEventForm();
+            simulateSync();
+        }
+
+        function openEditTaskForm(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                currentEditingTaskId = taskId;
+                document.getElementById('editTaskTitle').value = task.title;
+                document.getElementById('editTaskDesc').value = task.description;
+                document.getElementById('editTaskDate').value = task.date;
+                document.getElementById('editTaskTime').value = task.time;
+                document.getElementById('editTaskPriority').value = task.priority;
+                document.getElementById('editTaskStatus').value = task.status;
+                document.getElementById('editTaskOverlay').classList.add('active');
+            }
+        }
+
+        function closeEditTaskForm() {
+            document.getElementById('editTaskOverlay').classList.remove('active');
+            currentEditingTaskId = null;
+        }
+
+        function openEditEventForm(eventId) {
+            const event = events.find(e => e.id === eventId);
+            if (event) {
+                currentEditingEventId = eventId;
+                document.getElementById('editEventTask').value = event.taskId;
+                document.getElementById('editEventTitle').value = event.title;
+                document.getElementById('editEventDesc').value = event.description;
+                document.getElementById('editEventStartDate').value = event.startDate;
+                document.getElementById('editEventStartTime').value = event.startTime;
+                document.getElementById('editEventHours').value = event.hours;
+                document.getElementById('editEventEndDate').value = event.endDate;
+                document.getElementById('editEventEndTime').value = event.endTime;
+                
+                const editEventTaskSelect = document.getElementById('editEventTask');
+                editEventTaskSelect.innerHTML = '<option value="">Выберите задачу</option>';
+                tasks.forEach(task => {
+                    const option = document.createElement('option');
+                    option.value = task.id;
+                    option.textContent = task.title;
+                    editEventTaskSelect.appendChild(option);
+                });
+                editEventTaskSelect.value = event.taskId;
+                
+                document.getElementById('editEventOverlay').classList.add('active');
+            }
+        }
+
+        function closeEditEventForm() {
+            document.getElementById('editEventOverlay').classList.remove('active');
+            currentEditingEventId = null;
+        }
+
+        function saveTaskChanges() {
+            if (!currentEditingTaskId) return;
+
+            const task = tasks.find(t => t.id === currentEditingTaskId);
+            if (task) {
+                task.title = document.getElementById('editTaskTitle').value;
+                task.description = document.getElementById('editTaskDesc').value;
+                task.date = document.getElementById('editTaskDate').value;
+                task.time = document.getElementById('editTaskTime').value;
+                task.priority = document.getElementById('editTaskPriority').value;
+                task.status = document.getElementById('editTaskStatus').value;
+
+                saveData();
+                renderTasks();
+                updateTaskSelect();
+                updateStats();
+                closeEditTaskForm();
+                simulateSync();
+            }
+        }
+
+        function saveEventChanges() {
+            if (!currentEditingEventId) return;
+
+            const event = events.find(e => e.id === currentEditingEventId);
+            if (event) {
+                event.taskId = document.getElementById('editEventTask').value;
+                event.title = document.getElementById('editEventTitle').value;
+                event.description = document.getElementById('editEventDesc').value;
+                event.startDate = document.getElementById('editEventStartDate').value;
+                event.startTime = document.getElementById('editEventStartTime').value;
+                event.hours = parseFloat(document.getElementById('editEventHours').value);
+                event.endDate = document.getElementById('editEventEndDate').value;
+                event.endTime = document.getElementById('editEventEndTime').value;
+
+                saveData();
+                renderTasks();
+                updateStats();
+                closeEditEventForm();
+                simulateSync();
+            }
+        }
+
+        function renderTasks() {
+            const newTasksContainer = document.getElementById('tasks-new');
+            const inProgressTasksContainer = document.getElementById('tasks-in-progress');
+            const completedTasksContainer = document.getElementById('tasks-completed');
+
+            // Clear all containers
+            newTasksContainer.innerHTML = '';
+            inProgressTasksContainer.innerHTML = '';
+            completedTasksContainer.innerHTML = '';
+
+            // Get today's date for filtering new tasks
+            const today = new Date().toISOString().split('T')[0];
+
+            // Filter tasks based on search
+            const filteredTasks = tasks.filter(task => {
+                if (!searchTerm) return true;
+                
+                const taskMatches = task.title.toLowerCase().includes(searchTerm) || 
+                                  task.description.toLowerCase().includes(searchTerm);
+                
+                const taskEvents = events.filter(event => event.taskId === task.id);
+                const eventMatches = taskEvents.some(event => 
+                    event.title.toLowerCase().includes(searchTerm) || 
+                    event.description.toLowerCase().includes(searchTerm)
+                );
+                
+                return taskMatches || eventMatches;
+            });
+
+            if (filteredTasks.length === 0 && searchTerm) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.className = 'empty-state';
+                emptyMsg.textContent = 'Задачи не найдены';
+                newTasksContainer.appendChild(emptyMsg);
+                return;
+            }
+
+            // Render tasks in appropriate columns
+            filteredTasks.forEach(task => {
+                const taskEvents = events.filter(event => event.taskId === task.id);
+                const taskElement = createTaskElement(task, taskEvents);
+                
+                // New tasks are only from today
+                if (task.status === 'new') {
+                    const taskDate = task.createdAt.split('T')[0];
+                    if (taskDate === today) {
+                        newTasksContainer.appendChild(taskElement);
+                    }
+                } else if (task.status === 'in-progress') {
+                    inProgressTasksContainer.appendChild(taskElement);
+                } else if (task.status === 'completed') {
+                    completedTasksContainer.appendChild(taskElement);
+                }
+            });
+
+            // Add empty states if no tasks in column
+            if (newTasksContainer.children.length === 0 && !searchTerm) {
+                newTasksContainer.innerHTML = '<div class="empty-state">Нет новых задач</div>';
+            }
+            if (inProgressTasksContainer.children.length === 0 && !searchTerm) {
+                inProgressTasksContainer.innerHTML = '<div class="empty-state">Нет задач в работе</div>';
+            }
+            if (completedTasksContainer.children.length === 0 && !searchTerm) {
+                completedTasksContainer.innerHTML = '<div class="empty-state">Нет завершённых задач</div>';
+            }
+
+            // Add add task button to new column (only when not searching)
+            if (!searchTerm) {
+                const addTaskBtn = document.createElement('button');
+                addTaskBtn.className = 'add-task-btn';
+                addTaskBtn.innerHTML = '+ Добавить задачу';
+                addTaskBtn.onclick = openAddTaskForm;
+                newTasksContainer.appendChild(addTaskBtn);
+            }
+        }
+
+        function createTaskElement(task, taskEvents) {
+            const taskElement = document.createElement('div');
+            taskElement.className = 'task-item';
+            
+            const taskDateTime = `${formatDisplayDate(task.date)} ${task.time}`;
+            const totalTaskHours = taskEvents.reduce((sum, event) => sum + event.hours, 0);
+            
+            taskElement.innerHTML = `
+                <div class="task-header" onclick="toggleTaskEvents('${task.id}')">
+                    <div class="task-title">${escapeHtml(task.title)}</div>
+                    <button class="task-toggle">▼</button>
+                </div>
+                <div class="task-description">${escapeHtml(task.description) || 'Нет описания'}</div>
+                <div class="task-meta">
+                    <span>${taskDateTime}</span>
+                    <span>Часы: ${totalTaskHours.toFixed(1)}</span>
+                </div>
+                <div class="task-actions">
+                    <button class="secondary" onclick="openEditTaskForm('${task.id}')">Изменить</button>
+                    ${task.status !== 'in-progress' ? `<button class="secondary" onclick="changeTaskStatus('${task.id}', 'in-progress')">В работу</button>` : ''}
+                    ${task.status !== 'completed' ? `<button class="secondary" onclick="changeTaskStatus('${task.id}', 'completed')">Завершить</button>` : ''}
+                    <button class="danger" onclick="deleteTask('${task.id}')">Удалить</button>
+                </div>
+                <div class="events-container" id="events-${task.id}">
+                    ${renderTaskEvents(taskEvents, task.id)}
+                </div>
+            `;
+            
+            return taskElement;
+        }
+
+        function renderTaskEvents(taskEvents, taskId) {
+            let eventsHTML = '';
+            
+            if (taskEvents.length === 0) {
+                eventsHTML = '<div class="empty-state" style="padding: 20px; font-size: 12px;">Нет событий для этой задачи</div>';
+            } else {
+                eventsHTML = taskEvents.map(event => `
+                    <div class="event-item">
+                        <div class="event-header">
+                            <div class="event-title">${escapeHtml(event.title)}</div>
+                            <div class="event-hours">${event.hours}ч</div>
+                        </div>
+                        <div class="event-description">${escapeHtml(event.description) || 'Нет описания'}</div>
+                        <div class="event-meta">
+                            <span>Начало: ${formatDisplayDate(event.startDate)} ${event.startTime}</span>
+                            <span>Окончание: ${formatDisplayDate(event.endDate)} ${event.endTime}</span>
+                        </div>
+                        <div class="event-actions">
+                            <button class="secondary" onclick="openEditEventForm('${event.id}')">Изменить</button>
+                            <button class="danger" onclick="deleteEvent('${event.id}')">Удалить</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // Add event button styled like events with smaller font
+            eventsHTML += `
+                <button class="add-event-btn" onclick="openAddEventForm('${taskId}')">
+                    + Добавить событие
+                </button>
+            `;
+            
+            return eventsHTML;
+        }
+
+        function toggleTaskEvents(taskId) {
+            const eventsContainer = document.getElementById(`events-${taskId}`);
+            const toggleButton = eventsContainer.previousElementSibling.previousElementSibling.querySelector('.task-toggle');
+            
+            eventsContainer.classList.toggle('expanded');
+            toggleButton.textContent = eventsContainer.classList.contains('expanded') ? '▲' : '▼';
+        }
+
+        function changeTaskStatus(taskId, status) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                task.status = status;
+                saveData();
+                renderTasks();
+                updateStats();
+                simulateSync();
+            }
+        }
+
+        function deleteTask(taskId) {
+            if (confirm('Удалить задачу и все связанные события?')) {
+                tasks = tasks.filter(t => t.id !== taskId);
+                events = events.filter(e => e.taskId !== taskId);
+                saveData();
+                renderTasks();
+                updateTaskSelect();
+                updateStats();
+                simulateSync();
+            }
+        }
+
+        function deleteEvent(eventId) {
+            if (confirm('Удалить событие?')) {
+                events = events.filter(e => e.id !== eventId);
+                saveData();
+                renderTasks();
+                updateStats();
+                simulateSync();
+            }
+        }
+
+        function updateTaskSelect() {
+            const selects = ['eventTaskSelect'];
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    select.innerHTML = '<option value="">Выберите задачу</option>';
+                    tasks.forEach(task => {
+                        const option = document.createElement('option');
+                        option.value = task.id;
+                        option.textContent = task.title;
+                        select.appendChild(option);
+                    });
+                }
+            });
+        }
+
+        function updateStats() {
+            const activeTasks = tasks.filter(t => t.status !== 'completed').length;
+            const doneTasks = tasks.filter(t => t.status === 'completed').length;
+            const totalEvents = events.length;
+            const totalHours = events.reduce((sum, event) => sum + event.hours, 0);
+
+            document.getElementById('statActive').textContent = activeTasks;
+            document.getElementById('statDone').textContent = doneTasks;
+            document.getElementById('statEvents').textContent = totalEvents;
+            document.getElementById('statHours').textContent = totalHours.toFixed(1);
+            document.getElementById('totalCount').textContent = tasks.length;
+            document.getElementById('activeCount').textContent = activeTasks;
+            document.getElementById('hoursCount').textContent = totalHours.toFixed(1);
+
+            updateTimeStats();
+        }
+
+        function updateTimeStats() {
+            const today = new Date().toISOString().split('T')[0];
+            const weekStart = new Date();
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+            const weekStartStr = weekStart.toISOString().split('T')[0];
+            
+            const monthStart = new Date();
+            monthStart.setDate(1);
+            const monthStartStr = monthStart.toISOString().split('T')[0];
+
+            const todayHours = events
+                .filter(event => event.startDate === today)
+                .reduce((sum, event) => sum + event.hours, 0);
+
+            const weekHours = events
+                .filter(event => event.startDate >= weekStartStr)
+                .reduce((sum, event) => sum + event.hours, 0);
+
+            const monthHours = events
+                .filter(event => event.startDate >= monthStartStr)
+                .reduce((sum, event) => sum + event.hours, 0);
+
+            document.getElementById('statToday').textContent = todayHours.toFixed(1) + 'ч';
+            document.getElementById('statWeek').textContent = weekHours.toFixed(1) + 'ч';
+            document.getElementById('statMonth').textContent = monthHours.toFixed(1) + 'ч';
+        }
+
+        function simulateSync() {
+            syncStatus.textContent = 'Синхронизация...';
+            syncStatus.className = 'sync-status';
+            
+            setTimeout(() => {
+                const success = Math.random() > 0.1;
+                if (success) {
+                    syncStatus.textContent = 'Синхронизировано';
+                    syncStatus.className = 'sync-status synced';
+                } else {
+                    syncStatus.textContent = 'Ошибка синхронизации';
+                    syncStatus.className = 'sync-status';
+                }
+            }, 1500);
+        }
+
+        function syncWith1C() {
+            simulateSync();
+        }
+
+        function toggleTheme() {
+            const isDark = document.body.classList.contains('dark');
+            document.body.classList.toggle('dark');
+            document.body.classList.toggle('light');
+            
+            document.querySelectorAll('input[type="date"], input[type="time"]').forEach(input => {
+                input.style.colorScheme = isDark ? 'light' : 'dark';
+            });
+        }
+
+        // Utility functions
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDisplayDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ru-RU');
+        }
+
+        function loadData() {
+            const savedTasks = localStorage.getItem('tasks');
+            const savedEvents = localStorage.getItem('events');
+            
+            if (savedTasks) tasks = JSON.parse(savedTasks);
+            if (savedEvents) events = JSON.parse(savedEvents);
+        }
+
+        function saveData() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            localStorage.setItem('events', JSON.stringify(events));
+        }
+    </script>
+</body>
+</html>
